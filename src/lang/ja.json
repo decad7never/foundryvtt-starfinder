@@ -24,6 +24,8 @@
         "AbilityModifierBase": "能力修正値: {mod}",
         "AbilityModifiersTooltip": "{type} ボーナス: {mod} ({source})",
         "AbilityPenaltyPlaceholder": "PNL",
+        "AbilityScoreRaceTooltip": "Race: {mod}",
+        "AbilityScoreThemeTooltip": "Theme: {mod}",
         "AbilityPenaltyTitle": "能力ペナルティ",
         "AbilityPenaltyTooltip": "能力ペナルティ: {mod}",
         "AbilityScoreBase": "基本能力値",
@@ -135,7 +137,7 @@
                     "SpellAttackDamage": "呪文ダメージ",
                     "SpecificWeaponAttackDamage": "特殊武器ダメージ",
                     "WeaponPropertyDamage": "武器属性ダメージ",
-                    "AllAttackDamage": "全ての攻撃ダメージ"
+                    "AllAttackDamage": "全ての攻撃ダメージ",
                     "Encumbrance": "Encumbrance"
                 },
                 "UI": {
@@ -188,12 +190,25 @@
         "BaseAttackBonusTitle": "基本攻撃ﾎﾞｰﾅｽ",
         "Biography": "経歴",
         "Biotech": "バイオテック",
-        "BrowserClearFilters": "フィルタクリア",
-        "BrowserFilterClass": "クラスでフィルタ",
-        "BrowserFilterSchool": "系統でフィルタ",
-        "BrowserSearchPlaceholder": "検索",
-        "BrowserSearchTitle": "右クリックでガイド",
-        "BrowserSortyByLabel": "並替",
+        "Browsers": {
+            "ItemBrowser": {
+                "BrowserClearFilters": "フィルタクリア",
+                "BrowserSearchPlaceholder": "検索",
+                "BrowserSearchTitle": "右クリックでガイド",
+                "BrowserSortyByLabel": "並替",
+                "BrowserSortMethodName": "Name",
+                "SearchHint": "You can type the name of the item you are searching for.",
+                "Title": "Browse Items"
+            },
+            "SpellBrowser": {
+                "BrowserFilterClass": "クラスでフィルタ",
+                "BrowserFilterLevel": "Filter by Level",
+                "BrowserFilterSchool": "系統でフィルタ",
+                "BrowserSortMethodLevel": "Level",
+                "Button": "Spell Browser",
+                "Title": "Browse Spells"
+            }
+        },
         "CancelButtonLabel": "キャンセル",
         "Canvas": {
             "Interface": {
@@ -552,6 +567,28 @@
         "LimitedUsePeriodsLong": "大休憩",
         "LimitedUsePeriodsShort": "小休憩",
         "Long": "長距離",
+        "Magic": {
+            "Levels": {
+                "0": "0 Level",
+                "1": "1st Level",
+                "2": "2nd Level",
+                "3": "3rd Level",
+                "4": "4th Level",
+                "5": "5th Level",
+                "6": "6th Level"
+            },
+            "Schools": {
+                "Abjuration": "Abjuration",
+                "Conjuration": "Conjuration",
+                "Divination": "Divination",
+                "Enchantment": "Enchantment",
+                "Evocation": "Evocation",
+                "Illusion": "Illusion",
+                "Necromancy": "Necromancy",
+                "Transmutation": "Transmutation",
+                "Universal": "Universal"
+            }
+        },
         "Magitech": "マギテック",
         "Medium": "中距離",
         "Meter": "ﾒｰﾀｰ",
@@ -903,6 +940,9 @@
         "WillSave": "意志",
         "Units": {
             "Speed": "ft."
+        },
+        "Classes": {
+            "IsCasterClass": "Is this a spell casting class?"
         },
 
         "LocalizationTerminator": ""
