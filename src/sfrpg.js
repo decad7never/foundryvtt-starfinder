@@ -11,7 +11,7 @@ import { preloadHandlebarsTemplates } from "./module/templates.js";
 import { registerSystemSettings } from "./module/settings.js";
 import { measureDistances, getBarAttribute, handleItemDropCanvas } from "./module/canvas.js";
 import { ActorSFRPG } from "./module/actor/actor.js";
-import { initializeRemoteInventory } from "./module/actor/actor-inventory.js";
+import { initializeRemoteInventory, ActorItemHelper } from "./module/actor/actor-inventory.js";
 import { ActorSheetSFRPGCharacter } from "./module/actor/sheet/character.js";
 import { ActorSheetSFRPGNPC } from "./module/actor/sheet/npc.js";
 import { ActorSheetSFRPGStarship } from "./module/actor/sheet/starship.js";
@@ -164,12 +164,47 @@ Hooks.once("setup", function () {
         } else return Math.floor(reduced);
     });
 
+    Handlebars.registerHelper('getTotalStorageCapacity', function (item) {
+        let totalCapacity = 0;
+        if (item?.data?.container?.storage && item.data.container.storage.length > 0) {
+            for (let storage of item.data.container.storage) {
+                totalCapacity += storage.amount;
+            }
+        }
+        return totalCapacity;
+    });
+
     Handlebars.registerHelper('capitalize', function (value) {
         return value.capitalize();
     });
 
-    Handlebars.registerHelper('contains', function (entries, value) {
-        return (entries instanceof Array && entries.includes(value));
+    Handlebars.registerHelper('contains', function (container, value) {
+        if (!container || !value) return false;
+
+        if (container instanceof Array) {
+            return container.includes(value);
+        }
+
+        if (container instanceof Object) {
+            return container.hasOwnProperty(value);
+        }
+
+        return false;
+    });
+
+    Handlebars.registerHelper('console', function (value) {
+        console.log(value);
+    });
+
+    Handlebars.registerHelper('indexOf', function (array, value, zeroBased = true) {
+        const index = array.indexOf(value);
+        if (index < 0) return index;
+        return index + (zeroBased ? 0 : 1);
+    });
+
+    /** Returns the value based on whether left is null or not. */
+    Handlebars.registerHelper('leftOrRight', function (left, right) {
+        return left || right;
     });
 });
 
@@ -192,7 +227,25 @@ Hooks.on('ready', () => {
     RPC.initialize();
 
     initializeRemoteInventory();
+
+    if (game.user.isGM) {
+        migrateOldContainers();
+    }
 });
+
+async function migrateOldContainers() {
+    for (let actor of game.actors.entries) {
+        let sheetActorHelper = new ActorItemHelper(actor._id, null, null);
+        await sheetActorHelper.migrateItems();
+    }
+
+    for (let scene of game.scenes.entries) {
+        for (let token of scene.data.tokens) {
+            let sheetActorHelper = new ActorItemHelper(token.actorId, token._id, scene._id);
+            await sheetActorHelper.migrateItems();
+        }
+    }
+}
 
 export async function handleOnDrop(event) {
     event.preventDefault();

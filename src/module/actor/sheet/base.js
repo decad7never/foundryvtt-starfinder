@@ -2,7 +2,7 @@ import { TraitSelectorSFRPG } from "../../apps/trait-selector.js";
 import { ActorSheetFlags } from "../../apps/actor-flags.js";
 import { getSpellBrowser } from "../../packs/spell-browser.js";
 
-import { moveItemBetweenActorsAsync, ActorItemHelper } from "../actor-inventory.js";
+import { moveItemBetweenActorsAsync, getFirstAcceptableStorageIndex, ActorItemHelper, containsItems } from "../actor-inventory.js";
 import { RPC } from "../../rpc.js"
 
 import { ItemDeletionDialog } from "../../apps/item-deletion-dialog.js"
@@ -357,7 +357,7 @@ export class ActorSheetSFRPG extends ActorSheet {
         let actorHelper = new ActorItemHelper(this.actor._id, this.token ? this.token.id : null, this.token ? this.token.scene.id : null);
         let item = actorHelper.getOwnedItem(itemId);
 
-        let containsItems = (item.data.data.contents && item.data.data.contents.length > 0);
+        let containsItems = (item.data.data.container?.contents && item.data.data.container.contents.length > 0);
         ItemDeletionDialog.show(item.name, containsItems, (recursive) => {
             actorHelper.deleteOwnedItem(itemId, recursive);
             li.slideUp(200, () => this.render(false));
@@ -519,6 +519,10 @@ export class ActorSheetSFRPG extends ActorSheet {
             return;
         }
 
+        if (containsItems(item)) {
+            return;
+        }
+
         let bigStack = Math.ceil(itemQuantity / 2.0);
         let smallStack = Math.floor(itemQuantity / 2.0);
 
@@ -530,16 +534,7 @@ export class ActorSheetSFRPG extends ActorSheet {
         let itemData = duplicate(item.data);
         itemData._id = null;
         itemData.data.quantity = smallStack;
-        let newItem = await actorHelper.createOwnedItem(itemData);
-
-        let containerItem = actorHelper.findItem(x => x.data.data.contents && x.data.data.contents.includes(item._id));
-        if (containerItem) {
-            let newContents = duplicate(containerItem.data.data.contents);
-            newContents.push(newItem._id);
-
-            update = { _id: containerItem._id, "data.contents": newContents };
-            await actorHelper.updateOwnedItem(update);
-        }
+        await actorHelper.createOwnedItem(itemData);
     }
 
     _prepareSpellbook(data, spells) {
@@ -711,11 +706,12 @@ export class ActorSheetSFRPG extends ActorSheet {
 
             if (targetContainer) {
                 let newContents = [];
-                if (targetContainer.data.data.contents) {
-                    newContents = duplicate(targetContainer.data.data.contents);
+                if (targetContainer.data.data.container?.contents) {
+                    newContents = duplicate(targetContainer.data.data.container?.contents || []);
                 }
-                newContents.push(addedItem._id);
-                let update = { _id: targetContainer._id, "data.contents": newContents };
+                let preferredStorageIndex = getFirstAcceptableStorageIndex(targetContainer, addedItem) || 0;
+                newContents.push({id: addedItem._id, index: preferredStorageIndex});
+                let update = { _id: targetContainer._id, "data.container.contents": newContents };
                 await targetActor.updateOwnedItem(update);
             }
 
@@ -772,11 +768,12 @@ export class ActorSheetSFRPG extends ActorSheet {
                 
                 if (targetContainer) {
                     let newContents = [];
-                    if (targetContainer.data.data.contents) {
-                        newContents = duplicate(targetContainer.data.data.contents);
+                    if (targetContainer.data.data.container?.contents) {
+                        newContents = duplicate(targetContainer.data.data.container?.contents || []);
                     }
-                    newContents.push(addedItem._id);
-                    let update = { _id: targetContainer._id, "data.contents": newContents };
+                    let preferredStorageIndex = getFirstAcceptableStorageIndex(targetContainer, addedItem) || 0;
+                    newContents.push({id: addedItem._id, index: preferredStorageIndex});
+                    let update = { _id: targetContainer._id, "data.container.contents": newContents };
                     await targetActor.updateOwnedItem(update);
                 }
 
@@ -793,7 +790,7 @@ export class ActorSheetSFRPG extends ActorSheet {
         for (let item of items) {
             let itemData = {
                 item: item,
-                parent: items.find(x => x.data.contents && x.data.contents.includes(item._id)),
+                parent: items.find(x => x.data.container?.contents && x.data.container.contents.find(y => y.id === item._id)),
                 contents: []
             };
             preprocessedItems.push(itemData);

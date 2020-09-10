@@ -5,10 +5,14 @@
                     {{~#if item.isStack}}({{item.data.quantity}}) {{/if}}
                     {{item.name~}}
                 </h4>
-                {{#if (and owner (and (and item.hasAttack item.data.equipped) bigItem))}}
+                {{#if (and owner (and bigItem (or item.hasAttack item.hasDamage)))}}
                 <div class="item-action flexcol">
+                    {{#if item.hasAttack}}
                     <button class="tag attack">{{localize "SFRPG.Attack"}}</button>
+                    {{/if}}
+                    {{#if item.hasDamage}}
                     <button class="tag damage">{{localize "SFRPG.Damage"}}</button>
+                    {{/if}}
                 </div>
                 {{/if}}
             </div>
@@ -32,9 +36,9 @@
                     {{/if}}
                 {{else if children}}
                     {{#if (eq item.type "container")}}
-                        {{getChildBulk children}} / {{item.data.storageCapacity}} {{localize "SFRPG.ActorSheet.Inventory.Container.CapacityLabelBulk"}}
+                        {{getChildBulk children}} / {{getTotalStorageCapacity item}} {{localize "SFRPG.ActorSheet.Inventory.Container.CapacityLabelBulk"}}
                     {{else}}
-                        {{children.length}} / {{item.data.storageCapacity}} {{localize "SFRPG.ActorSheet.Inventory.Container.CapacityLabelItems"}}
+                        {{children.length}} / {{getTotalStorageCapacity item}} {{localize "SFRPG.ActorSheet.Inventory.Container.CapacityLabelItems"}}
                     {{/if}}
                 {{/if}}
             </div>
